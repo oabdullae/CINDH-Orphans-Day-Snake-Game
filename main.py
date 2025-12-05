@@ -94,19 +94,8 @@ def draw_snake_body_block(block, is_head):
 
 # ---
 
-def update_snake(snake_body, direction):
-    # is the snake gonna eat
-
+def update_snake(snake_body, direction, food_flat_coords, free_boxes):
     snake_ate = False
-    # delete tail snake_body[-1] if snake didnt eat
-    if not snake_ate:
-        # delete tail snake_body[-1]
-        pygame.draw.rect(screen, BG_CLR, snake_body[-1])
-        snake_body.pop(-1)
-    else:
-        pass # keep tail if snake ate
-
-    
 
     # add a new block in front of the head if there is no collision
     new_block = None
@@ -141,22 +130,44 @@ def update_snake(snake_body, direction):
                 BOX_SIZE,
                 BOX_SIZE
             )
-        
+    
     # detect wall collisions
     if new_block.x not in range(TOPRIGHT, TOPRIGHT + (PLAYGROUND_BOXES * BOX_SIZE)):
-        return False # There is a collision
+        return -1 # There is a collision
     if new_block.y not in range(TOPRIGHT, TOPRIGHT + (PLAYGROUND_BOXES * BOX_SIZE)):
-        return False # There is a collision
+        return -1 # There is a collision
 
     # detect body collisions
     for i in range(len(snake_body)):
         if snake_body[i].x == new_block.x and snake_body[i].y == new_block.y:
-            return False
+            return -1
+
+    food_x = TOPRIGHT + (food_flat_coords % PLAYGROUND_BOXES) * BOX_SIZE
+    food_y = TOPRIGHT + ((food_flat_coords - food_flat_coords % PLAYGROUND_BOXES) // PLAYGROUND_BOXES) * BOX_SIZE
+    
+    # pdb.set_trace()
+    if food_x == new_block.x and food_y == new_block.y:
+        # pdb.set_trace()
+        snake_ate = True
+
+
+    # delete tail snake_body[-1] if snake didnt eat
+    if not snake_ate:
+        # delete tail snake_body[-1]
+        pygame.draw.rect(screen, BG_CLR, snake_body[-1])
+        snake_body.pop(-1)
+    else:
+        pass # keep tail if snake ate
+
 
     snake_body.insert(0, new_block)
-    draw_snake_body_block(snake_body[0], True)
-    draw_snake_body_block(snake_body[1], False)
-    return True
+    draw_snake_body_block(snake_body[0], True) # draw new head
+    draw_snake_body_block(snake_body[1], False) # make old head a regular body 
+                                                # part and not a head anymore
+    if snake_ate == True:
+        return 1
+    else:
+        return 0
 
 # ---
 
@@ -174,7 +185,7 @@ def spawn_food(free_boxes):
     i = (random_flat_coords - j) // PLAYGROUND_BOXES
     food_rect = draw_food(TOPRIGHT + j * BOX_SIZE, TOPRIGHT + i * BOX_SIZE)
     free_boxes.remove(random_flat_coords)
-    return random_flat_coords, food_rect
+    return random_flat_coords
 
 # ---
 
@@ -226,7 +237,7 @@ for i in range(18*18):
 
 # initialize snake body
 snake_body = [first_body_block]
-for i in range(1, 6):
+for i in range(1, 3):
     body_block = pygame.Rect(
         first_body_block.x + BOX_SIZE * i,
         first_body_block.y,
@@ -248,7 +259,7 @@ playground = pygame.Rect(46, 46, size, size)
 # Draw the box using the Rect object
 pygame.draw.rect(screen, BG_CLR, playground)
 
-food_flat_coords, food_rect = spawn_food(free_boxes)
+food_flat_coords = spawn_food(free_boxes)
 food_timeout = 0
 
 pygame.display.flip()
@@ -259,37 +270,39 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        old_snake_direction = snake_direction
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
                 if snake_direction != "DOWN":
-                    arrow_key_pressed = True
                     snake_direction = "UP"
-                    if not update_snake(snake_body, "UP"):
-                        running = False
             if event.key == pygame.K_DOWN:
                 if snake_direction != "UP":
-                    arrow_key_pressed = True
                     snake_direction = "DOWN"
-                    if not update_snake(snake_body, "DOWN"):
-                        running = False
             if event.key == pygame.K_RIGHT:
                 if snake_direction != "LEFT":
-                    arrow_key_pressed = True
                     snake_direction = "RIGHT"
-                    if not update_snake(snake_body, "RIGHT"):
-                        running = False
             if event.key == pygame.K_LEFT:
                 if snake_direction != "RIGHT":
-                    arrow_key_pressed = True
                     snake_direction = "LEFT"
-                    if not update_snake(snake_body, "LEFT"):
-                        running = False
-    # screen.fill(BLACK) # to change later for only deleting the relevant parts
-    if not arrow_key_pressed:
-        if not update_snake(snake_body, snake_direction):
+
+    match update_snake(snake_body, snake_direction, food_flat_coords, free_boxes):
+        case -1:
             running = False
             continue
-        pass
+        case 0: # snake didnt eat 
+            pass 
+        case 1: # snake did eat
+            food_timeout = 0
+            clear_old_food(food_flat_coords, free_boxes)
+            food_flat_coords = spawn_food(free_boxes)
+
+
+    # screen.fill(BLACK) # to change later for only deleting the relevant parts
+    # if not arrow_key_pressed:
+    #     if update_snake(snake_body, snake_direction) == -1:
+    #         running = False
+    #         continue
+    #     pass
 
 
     draw_border(
@@ -342,7 +355,7 @@ while running:
         food_timeout -= TIMEOUT
         # respawn food somewhere else
         clear_old_food(food_flat_coords, free_boxes)
-        food_flat_coords, food_rect = spawn_food(free_boxes)
+        food_flat_coords = spawn_food(free_boxes)
 
 
 pygame.quit()
