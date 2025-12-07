@@ -10,7 +10,7 @@ PLAYGROUND_DIM = 810 # to divide by 30 cols and rows
 PLAYGROUND_BOXES = 18
 BOX_SIZE = 45
 
-TOPRIGHT = 46 # both col and row have same value 46
+TOPLEFT = 46 # both col and row have same value 46
 
 PADDING = 40
 BORDER_THICKNESS = 10
@@ -48,20 +48,20 @@ def draw_grid():
         pygame.draw.line(
             screen,
             GRASS_GREEN, 
-            (TOPRIGHT + BOX_SIZE * i, TOPRIGHT),
+            (TOPLEFT + BOX_SIZE * i, TOPLEFT),
             (
-                TOPRIGHT + BOX_SIZE * i,
-                TOPRIGHT * BOX_SIZE*PLAYGROUND_BOXES
+                TOPLEFT + BOX_SIZE * i,
+                TOPLEFT * BOX_SIZE*PLAYGROUND_BOXES
             )
         )
     for i in range(PLAYGROUND_BOXES):
         pygame.draw.line(
             screen, 
             GRASS_GREEN, 
-            (TOPRIGHT, TOPRIGHT + BOX_SIZE * i), 
+            (TOPLEFT, TOPLEFT + BOX_SIZE * i), 
             (
-                TOPRIGHT + BOX_SIZE * PLAYGROUND_BOXES,
-                TOPRIGHT + BOX_SIZE * i
+                TOPLEFT + BOX_SIZE * PLAYGROUND_BOXES,
+                TOPLEFT + BOX_SIZE * i
             )
         )
 
@@ -131,9 +131,9 @@ def update_snake(snake_body, direction, food_flat_coords, free_boxes):
             )
     
     # detect wall collisions
-    if new_block.x not in range(TOPRIGHT, TOPRIGHT + (PLAYGROUND_BOXES * BOX_SIZE)):
+    if new_block.x not in range(TOPLEFT, TOPLEFT + (PLAYGROUND_BOXES * BOX_SIZE)):
         return -1 # There is a collision
-    if new_block.y not in range(TOPRIGHT, TOPRIGHT + (PLAYGROUND_BOXES * BOX_SIZE)):
+    if new_block.y not in range(TOPLEFT, TOPLEFT + (PLAYGROUND_BOXES * BOX_SIZE)):
         return -1 # There is a collision
 
     # detect body collisions
@@ -141,8 +141,8 @@ def update_snake(snake_body, direction, food_flat_coords, free_boxes):
         if snake_body[i].x == new_block.x and snake_body[i].y == new_block.y:
             return -1
 
-    food_x = TOPRIGHT + (food_flat_coords % PLAYGROUND_BOXES) * BOX_SIZE
-    food_y = TOPRIGHT + ((food_flat_coords - food_flat_coords % PLAYGROUND_BOXES) // PLAYGROUND_BOXES) * BOX_SIZE
+    food_x = TOPLEFT + (food_flat_coords % PLAYGROUND_BOXES) * BOX_SIZE
+    food_y = TOPLEFT + ((food_flat_coords - food_flat_coords % PLAYGROUND_BOXES) // PLAYGROUND_BOXES) * BOX_SIZE
     
     # pdb.set_trace()
     if food_x == new_block.x and food_y == new_block.y:
@@ -182,15 +182,15 @@ def spawn_food(free_boxes):
     random_flat_coords = random.choice(free_boxes)
     j = random_flat_coords % PLAYGROUND_BOXES
     i = (random_flat_coords - j) // PLAYGROUND_BOXES
-    food_rect = draw_food(TOPRIGHT + j * BOX_SIZE, TOPRIGHT + i * BOX_SIZE)
+    food_rect = draw_food(TOPLEFT + j * BOX_SIZE, TOPLEFT + i * BOX_SIZE)
     free_boxes.remove(random_flat_coords)
     return random_flat_coords
 
 # ---
 
 def block_to_flat_coords(block):
-    i = (block.y - TOPRIGHT) // BOX_SIZE
-    j = (block.x - TOPRIGHT) // BOX_SIZE
+    i = (block.y - TOPLEFT) // BOX_SIZE
+    j = (block.x - TOPLEFT) // BOX_SIZE
     return PLAYGROUND_BOXES * i + j
 
 # ---
@@ -198,7 +198,7 @@ def block_to_flat_coords(block):
 def clear_old_food(flat_coords, free_boxes):
     j = flat_coords % PLAYGROUND_BOXES
     i = (flat_coords - j) // PLAYGROUND_BOXES
-    cleared = pygame.Rect(TOPRIGHT + j * BOX_SIZE, TOPRIGHT + i * BOX_SIZE, BOX_SIZE, 
+    cleared = pygame.Rect(TOPLEFT + j * BOX_SIZE, TOPLEFT + i * BOX_SIZE, BOX_SIZE, 
         BOX_SIZE)
     pygame.draw.rect(screen, BG_CLR, cleared)
     free_boxes.append(flat_coords)
@@ -210,8 +210,8 @@ def display_score(snake_body_length):
     font = pygame.font.Font(text_font, 16)
     text = font.render("SCORE: " + str(snake_body_length), True, WHITE, BG_CLR)
     textRect = text.get_rect()
-    center_col = TOPRIGHT // 2 + 16
-    center_row = TOPRIGHT // 2
+    center_col = TOPLEFT // 2 + 16
+    center_row = TOPLEFT // 2
     textRect.center = (center_col, center_row)
     screen.blit(text, textRect)
     pygame.display.flip()
@@ -226,8 +226,8 @@ def game_over_screen(snake_body_length):
     font = pygame.font.Font(text_font, 32)
     text = font.render("GAME OVER! Press Enter to Play Again", True, WHITE, BG_CLR)
     textRect = text.get_rect()
-    center_col = TOPRIGHT + (PLAYGROUND_DIM // 2)
-    center_row = TOPRIGHT + (PLAYGROUND_DIM // 2)
+    center_col = TOPLEFT + (PLAYGROUND_DIM // 2)
+    center_row = TOPLEFT + (PLAYGROUND_DIM // 2)
     textRect.center = (center_col, center_row)
     screen.blit(text, textRect)
     display_score(snake_body_length)
@@ -249,10 +249,10 @@ speed = 3
 
 while session:
     first_body_block = pygame.Rect(
-        #TOPRIGHT + BOX_SIZE * ((PLAYGROUND_BOXES-1)//2),
-        #TOPRIGHT+ BOX_SIZE *((PLAYGROUND_BOXES-1)//2),
-        TOPRIGHT + BOX_SIZE * 8,
-        TOPRIGHT+ BOX_SIZE * 8,
+        #TOPLEFT + BOX_SIZE * ((PLAYGROUND_BOXES-1)//2),
+        #TOPLEFT+ BOX_SIZE *((PLAYGROUND_BOXES-1)//2),
+        TOPLEFT + BOX_SIZE * 8,
+        TOPLEFT+ BOX_SIZE * 8,
         BOX_SIZE,
         BOX_SIZE
     )
@@ -368,7 +368,7 @@ while session:
         """
         """
         for i in range(18):
-            snake = pygame.Rect(TOPRIGHT + i*BOX_SIZE,TOPRIGHT, BOX_SIZE, BOX_SIZE)
+            snake = pygame.Rect(TOPLEFT + i*BOX_SIZE,TOPLEFT, BOX_SIZE, BOX_SIZE)
             pygame.draw.rect(screen, SUPERMAN_RED, snake)
             #inner_snake = pygame.Rect(46+1 + 10 + i*BOX_SIZE, 46+1 + 10, BOX_SIZE -2 - 20, BOX_SIZE -2- 20)
             #pygame.draw.rect(screen, SUPERMAN_BLUE, inner_snake)
@@ -386,7 +386,7 @@ while session:
                 is_head = True
             draw_snake_body_block(snake_body[i], is_head)
         """
-        r = pygame.Rect(TOPRIGHT, TOPRIGHT, BOX_SIZE, BOX_SIZE)
+        r = pygame.Rect(TOPLEFT, TOPLEFT, BOX_SIZE, BOX_SIZE)
         pygame.draw.rect(screen, SUPERMAN_BLUE, r) 
         """
 
