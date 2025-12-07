@@ -205,7 +205,20 @@ def clear_old_food(flat_coords, free_boxes):
     
 # ---
 
-def game_over_screen():
+def display_score(snake_body_length):
+    text_font = pygame.font.get_default_font()
+    font = pygame.font.Font(text_font, 16)
+    text = font.render("SCORE: " + str(snake_body_length), True, WHITE, BG_CLR)
+    textRect = text.get_rect()
+    center_col = TOPRIGHT // 2 + 16
+    center_row = TOPRIGHT // 2
+    textRect.center = (center_col, center_row)
+    screen.blit(text, textRect)
+    pygame.display.flip()
+
+# ---
+
+def game_over_screen(snake_body_length):
     size = 810
     playground = pygame.Rect(46, 46, size, size)
     pygame.draw.rect(screen, BG_CLR, playground)
@@ -217,6 +230,7 @@ def game_over_screen():
     center_row = TOPRIGHT + (PLAYGROUND_DIM // 2)
     textRect.center = (center_col, center_row)
     screen.blit(text, textRect)
+    display_score(snake_body_length)
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -227,7 +241,6 @@ def game_over_screen():
                     return True
         clock.tick(3)
         
-
 # ---
 
 session = True
@@ -377,7 +390,7 @@ while session:
         pygame.draw.rect(screen, SUPERMAN_BLUE, r) 
         """
 
-
+        display_score(len(snake_body))
         # draw_grid()
         pygame.display.flip() # refresh equivalent
 
@@ -401,7 +414,7 @@ while session:
     if quit_pressed:
         session = False
     else:
-        if game_over_screen():
+        if game_over_screen(len(snake_body)):
             pass
         else:
             running = False
